@@ -10,5 +10,6 @@ func main(){
 	for _,block := range bc.blocks{
 		fmt.Printf("Previous Has: %x\n", block.PreviousBlockHash)
 		fmt.Printf("Data: %s\n", block.Data)
+		fmt.Printf("Is Valid: %v\n", NewProofOfWork(block).IsValid())
 	}
 }
