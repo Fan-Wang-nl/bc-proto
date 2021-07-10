@@ -1,8 +1,8 @@
 package main
 
 import (
-	"os"
 	"github.com/boltdb/bolt"
+	"os"
 )
 
 const dbFile = "blockChain.db"
@@ -67,4 +67,29 @@ func (bc *BlockChain)AddBlock(data string) {
 		return nil
 	})
 	CheckErr( "AddBlock whole process", err)
+}
+
+type BlockChainIterator struct {
+	currHash []byte
+	db       *bolt.DB
+}
+
+func (bc *BlockChain)NewIterator() *BlockChainIterator{
+	return &BlockChainIterator{currHash: bc.tail, db:bc.db}
+}
+func (it *BlockChainIterator)Next() (block *Block){
+	err := it.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(blockBucket))
+		if bucket == nil{
+			return nil
+		}
+
+		data := bucket.Get(it.currHash)
+		block = Deserialize(data)
+		it.currHash = block.PreviousBlockHash
+		return nil
+	})
+	CheckErr("Next()", err)
+	return
+
 }
