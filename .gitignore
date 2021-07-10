@@ -16,4 +16,8 @@
 
 .vscode/
 .idea/
+#git clone https://github.com/boltdb/bolt.git
+bolt/
 block
+*.db
+*.db.lock

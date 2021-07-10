@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/gob"
 	"time"
 )
 
@@ -20,6 +22,26 @@ type Block struct {
 	//transaction information
 	Data []byte
 }
+
+func (block *Block)Serialize() []byte {
+	var buffer bytes.Buffer
+	encoder := gob.NewEncoder(&buffer)
+	err := encoder.Encode(block)
+	CheckErr("Serialize", err)
+	return buffer.Bytes()
+}
+
+func Deserialize(data []byte) *Block {
+	if len(data) == 0 {
+		return nil
+	}
+	var block Block
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	err := decoder.Decode(&block)
+	CheckErr("Deserialize", err)
+	return &block
+}
+
 
 func NewBlock(data string, PreviousBlockHash []byte) *Block {
 	var block Block
@@ -43,21 +65,7 @@ func NewBlock(data string, PreviousBlockHash []byte) *Block {
 	return &block
 }
 
-/*func (block *Block)SetHash(){
-	//sha256.Sum256()
-	tmp := [][]byte{ 
-		IntToByte(block.Version), 
-		block.PreviousBlockHash, 
-		block.MerkelRoot,
-		IntToByte(block.TimeStamp), 
-		IntToByte(block.Bits), 
-		IntToByte(block.Nonce),
-		block.Data} 
 
-		data := bytes.Join(tmp, []byte{}) 
-		hash := sha256.Sum256(data)
-		block.Hash = hash[:]
-}*/
 
 func NewGenesisBlock() *Block{
 	return NewBlock("Genesis Block", []byte{0})
