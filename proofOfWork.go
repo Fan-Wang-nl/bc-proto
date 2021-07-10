@@ -13,7 +13,7 @@ type ProofOfWork struct{
 	target *big.Int
 }
 
-const targetBits =24
+const targetBits = 4
 func NewProofOfWork(block *Block) *ProofOfWork {
 	//000000000000000.... 01
 	target := big.NewInt( 1)
@@ -31,7 +31,7 @@ func (pow *ProofOfWork)PrepareData(nonce int64)[]byte{
 		block.MerkelRoot,
 		IntToByte(block.TimeStamp),
 		IntToByte(targetBits),
-		IntToByte(block.Nonce),
+		IntToByte(nonce),
 		block.Data}
 	data := bytes.Join(tmp, []byte{})
 	return data
@@ -58,10 +58,9 @@ func (pow *ProofOfWork)Run() (int64, []byte){
 			fmt.Printf("found hash : %x\n, nonce :%d, ", hash, nonce)
 			break
 		} else {
-			//fmt.Printf("not found nonce, current nonce :%d, hash : %x\n", nonce, hash)
-			nonce++
-
+			fmt.Printf("not found nonce, current nonce :%d, hash : %x\n", nonce, hash)
 		}
+		nonce++
 	}
 	return nonce, hash[:]
 
