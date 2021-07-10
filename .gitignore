@@ -21,3 +21,5 @@ bolt/
 block
 *.db
 *.db.lock
+go.sum
+go.mod

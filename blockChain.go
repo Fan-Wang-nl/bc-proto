@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bc-proto/bolt"
 	"os"
+	"github.com/boltdb/bolt"
 )
 
 const dbFile = "blockChain.db"
