@@ -14,7 +14,7 @@ type BlockChain struct {
 	tail []byte
 }
 
-//CreateBlockchain creates a new blockchain DB
+// NewBlockChain CreateBlockchain creates a new blockchain DB
 func NewBlockChain() *BlockChain {
 	//bolt db, a key-value db. key should be the hash, and value should the serialized data
 	db, err := bolt.Open(dbFile, 0600, nil)
