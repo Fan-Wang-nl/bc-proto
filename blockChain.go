@@ -74,9 +74,12 @@ type BlockChainIterator struct {
 	db       *bolt.DB
 }
 
+// NewIterator create a new iterator for a given blockchain
 func (bc *BlockChain)NewIterator() *BlockChainIterator{
 	return &BlockChainIterator{currHash: bc.tail, db:bc.db}
 }
+
+// Next iteration process
 func (it *BlockChainIterator)Next() (block *Block){
 	err := it.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(blockBucket))
