@@ -18,10 +18,10 @@ type BlockChain struct {
 func NewBlockChain() *BlockChain {
 	//bolt db, a key-value db. key should be the hash, and value should the serialized data
 	db, err := bolt.Open(dbFile, 0600, nil)
-	CheckErr("NewBlockChain1", err)
+	CheckErr("NewBlockChain 1", err)
 	var lastHash []byte
 	//db.ViewC)
-	db.Update(func(tx *bolt.Tx) error {
+	err = db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(blockBucket))
 		if bucket != nil{
 			//get the hash of last block
@@ -39,13 +39,14 @@ func NewBlockChain() *BlockChain {
 		}
 		return nil
 	})
-			return &BlockChain{db,lastHash}
+	CheckErr("NewBlockChain 2", err)
+	return &BlockChain{db,lastHash}
 }
 
 
 func (bc *BlockChain)AddBlock(data string) {
 	var prevBlockHash []byte
-	bc.db.View(func(tx *bolt.Tx) error {
+	err := bc.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(blockBucket))
 		if bucket == nil {
 			os.Exit(1)
@@ -53,8 +54,9 @@ func (bc *BlockChain)AddBlock(data string) {
 		prevBlockHash = bucket.Get([]byte(lastHashKey))
 		return nil
 	})
+	CheckErr( "AddBlock whole process 2", err)
 	block := NewBlock(data, prevBlockHash)
-	err := bc.db.Update(func(tx *bolt.Tx) error {
+	err = bc.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(blockBucket))
 		if bucket == nil {
 			os.Exit(1)
@@ -66,7 +68,7 @@ func (bc *BlockChain)AddBlock(data string) {
 		bc.tail = block.Hash
 		return nil
 	})
-	CheckErr( "AddBlock whole process", err)
+	CheckErr( "AddBlock whole process 2", err)
 }
 
 type BlockChainIterator struct {
