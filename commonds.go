@@ -15,7 +15,7 @@ func (cli *CLI)PrintChain() {
 		fmt.Printf("Data: %s\n", block.Data)
 		fmt.Printf("Is Valid: %v\n", NewProofOfWork(block).IsValid())
 
-		if len(block.Hash) < 32{
+		if string(block.Data) == "Genesis Block"{
 			println("over!")
 			break
 		}
