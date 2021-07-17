@@ -13,7 +13,7 @@ type CLI struct {
 const usage = `
 	createChain --address ADDRESS	"create a blockchain"
 	addBlock 	--data Data	"add a block to this blockchain"
-	printChain			 "print all blocks"`
+	printChain			"print all blocks"`
 
 const AddBlockCmdString = "addBlock"
 const PrintChainCmdString = "printChain"
@@ -56,13 +56,13 @@ func (cli *CLI)Run() {
 				println("transaction data should not be empty")
 				cli.printUsage()
 			}
-			//cli.AddBlock(*addBlockPara)
+			cli.AddBlock(*addBlockPara)
 		}
 	case PrintChainCmdString:
 		err := printChainCmd.Parse(os.Args[2:])
 		CheckErr("parse Run parameter 2", err)
 		if printChainCmd.Parsed(){
-			//cli.PrintChain()
+			cli.PrintChain()
 		}
 	default:
 		println("unknown command")

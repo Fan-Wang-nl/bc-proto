@@ -1,13 +1,16 @@
 package main
 
-/*
+import "fmt"
+
 func (cli *CLI)AddBlock(data string) {
-	cli.bc.AddBlock(data)
+	bc := getBlockChainHandler()
+	bc.AddBlock(data)
 }
 
 
 func (cli *CLI)PrintChain() {
-	it := cli.bc.NewIterator()
+	bc := getBlockChainHandler()
+	it := bc.NewIterator()
 	for{
 		block := it.Next()
 		fmt.Printf("Current Has: %x\n", block.Hash)
@@ -21,10 +24,10 @@ func (cli *CLI)PrintChain() {
 		}
 	}
 }
- */
+
 
 func (cli *CLI) CreateChain(address string) {
-	bc := NewBlockChain()
+	bc := InitBlockChain()
 	bc.db.Close()
 	println("create a blockchain successfully")
 

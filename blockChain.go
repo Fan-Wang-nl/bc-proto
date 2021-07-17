@@ -14,32 +14,53 @@ type BlockChain struct {
 	tail []byte
 }
 
-// NewBlockChain CreateBlockchain creates a new blockchain DB
-func NewBlockChain() *BlockChain {
+// InitBlockChain CreateBlockchain creates a new blockchain DB
+func InitBlockChain() *BlockChain {
 	//bolt db, a key-value db. key should be the hash, and value should the serialized data
 	db, err := bolt.Open(dbFile, 0600, nil)
-	CheckErr("NewBlockChain 1", err)
+	CheckErr("InitBlockChain 1", err)
 	var lastHash []byte
 	//db.ViewC)
 	err = db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(blockBucket))
 		if bucket != nil{
-			//get the hash of last block
-			lastHash = bucket.Get([]byte(lastHashKey))
+			println("the bucket already exists, please change the name")
+			os.Exit(1)
 		}else{
 			//if there is no bucket, initialization is needed
 			genesis := NewGenesisBlock()
 			bucket, err := tx.CreateBucket( []byte(blockBucket))
-			CheckErr( "NewBlockChain2", err)
+			CheckErr( "InitBlockChain 2", err)
 			err = bucket.Put(genesis.Hash, genesis.Serialize())
-			CheckErr( "NewBlockChain3", err)
+			CheckErr( "InitBlockChain 3", err)
 			err = bucket.Put([]byte(lastHashKey), genesis.Hash)
-			CheckErr( "NewBlockChain4", err)
+			CheckErr( "InitBlockChain 4", err)
 			lastHash = genesis.Hash
 		}
 		return nil
 	})
-	CheckErr("NewBlockChain 2", err)
+	CheckErr("InitBlockChain 2", err)
+	return &BlockChain{db,lastHash}
+}
+
+func getBlockChainHandler() *BlockChain {
+	//bolt db, a key-value db. key should be the hash, and value should the serialized data
+	db, err := bolt.Open(dbFile, 0600, nil)
+	CheckErr("cannot find the database", err)
+	var lastHash []byte
+	//db.ViewC)
+	err = db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(blockBucket))
+		if bucket != nil{
+			//get the hash of last block
+			lastHash = bucket.Get([]byte(lastHashKey))
+		}else{
+			println("no bucket in the database")
+			os.Exit(1)
+		}
+		return nil
+	})
+	CheckErr("InitBlockChain 2", err)
 	return &BlockChain{db,lastHash}
 }
 
