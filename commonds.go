@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 /*
 func (cli *CLI)AddBlock(data string) {
 	cli.bc.AddBlock(data)
@@ -28,7 +26,7 @@ func (cli *CLI)PrintChain() {
 func (cli *CLI) CreateChain(address string) {
 	bc := NewBlockChain()
 	bc.db.Close()
-	fmt.Println("create a blockchain successfully")
+	println("create a blockchain successfully")
 
 
 }

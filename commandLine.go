@@ -17,7 +17,7 @@ const usage = `
 
 const AddBlockCmdString = "addBlock"
 const PrintChainCmdString = "printChain"
-const CreateChainCmdString = "CreateChain"
+const CreateChainCmdString = "createChain"
 
 func (cli *CLI)parameterCheck() {
 	if len(os.Args) < 2{
@@ -40,7 +40,7 @@ func (cli *CLI)Run() {
 		err := createChainCmd.Parse(os.Args[2:])
 		CheckErr("parse Run parameter 0", err)
 		//after parsed, the data will be injected to addBlockPara
-		if addBlockCmd.Parsed(){
+		if createChainCmd.Parsed(){
 			if *createChainPara == ""{
 				println("address should not be empty")
 				cli.printUsage()
@@ -65,8 +65,8 @@ func (cli *CLI)Run() {
 			//cli.PrintChain()
 		}
 	default:
+		println("unknown command")
 		cli.printUsage()
-
 	}
 }
 
