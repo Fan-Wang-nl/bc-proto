@@ -8,6 +8,7 @@ import (
 const dbFile = "blockChain.db"
 const blockBucket = "bucket"
 const lastHashKey = "key"
+const genesisInfo = "Initial block"
 
 type BlockChain struct {
 	db  *bolt.DB
@@ -15,7 +16,7 @@ type BlockChain struct {
 }
 
 // InitBlockChain CreateBlockchain creates a new blockchain DB
-func InitBlockChain() *BlockChain {
+func InitBlockChain(address string) *BlockChain {
 	//bolt db, a key-value db. key should be the hash, and value should the serialized data
 	db, err := bolt.Open(dbFile, 0600, nil)
 	CheckErr("InitBlockChain 1", err)
@@ -28,7 +29,8 @@ func InitBlockChain() *BlockChain {
 			os.Exit(1)
 		}else{
 			//if there is no bucket, initialization is needed
-			genesis := NewGenesisBlock()
+			coinbase := NewCoinbaseTx(address, genesisInfo)
+			var genesis = NewGenesisBlock(coinbase)
 			bucket, err := tx.CreateBucket( []byte(blockBucket))
 			CheckErr( "InitBlockChain 2", err)
 			err = bucket.Put(genesis.Hash, genesis.Serialize())
@@ -65,7 +67,7 @@ func getBlockChainHandler() *BlockChain {
 }
 
 
-func (bc *BlockChain)AddBlock(data string) {
+func (bc *BlockChain)AddBlock(txs []*Transaction) {
 	var prevBlockHash []byte
 	err := bc.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(blockBucket))
@@ -76,7 +78,7 @@ func (bc *BlockChain)AddBlock(data string) {
 		return nil
 	})
 	CheckErr( "AddBlock whole process 2", err)
-	block := NewBlock(data, prevBlockHash)
+	block := NewBlock(txs, prevBlockHash)
 	err = bc.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(blockBucket))
 		if bucket == nil {

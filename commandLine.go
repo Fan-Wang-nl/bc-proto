@@ -13,6 +13,8 @@ type CLI struct {
 const usage = `
 	createChain --address ADDRESS	"create a blockchain"
 	addBlock 	--data Data	"add a block to this blockchain"
+	send --from FROM --to TO --amount AMOUNT	"send coin from FROM to TO"
+	getBalance	--address ADDRESS	"check balance of an address"
 	printChain			"print all blocks"`
 
 const AddBlockCmdString = "addBlock"
