@@ -34,7 +34,7 @@ func NewTransaction(){
 
 }
 
-//Check if the current user can consume the UTXO
+//check if current user owns the UTXO and can consume them
 func (input *TXInput)validateUTXO(unlockScript string)  bool{
 	return input.ScriptSig == unlockScript
 }
@@ -53,6 +53,15 @@ func (tx *Transaction)setTXID() {
 
 	hash := sha256.Sum256(buffer.Bytes())
 	tx.TXID = hash[:]
+}
+
+func (tx *Transaction) IsCoinBase() bool {
+	if len(tx.TXInputs) == 1{
+		if len(tx.TXInputs[0].TXID) == 0 &&tx.TXInputs[0].Vout == -1{
+			return true
+		}
+	}
+	return false
 }
 
 // NewCoinbaseTx : initial block without input

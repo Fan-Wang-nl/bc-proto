@@ -119,5 +119,73 @@ func (it *BlockChainIterator)Next() (block *Block){
 	})
 	CheckErr("Next()", err)
 	return
+}
 
+//find all UTXOs of an address
+func (bc *BlockChain)findUTXOTransactions(address string)  []Transaction{
+	it := bc.NewIterator()
+	//find all transactions which contain the output related to this address
+	var UTXOTransactions []Transaction
+
+	//find all spent transaction outputs (which are used as inputs in transactions)
+	STXO := make(map[string][]int64)
+	//traverse all the blocks
+	for{
+		block := it.Next()
+		//traverse all the transactions in the block
+		for _,tx := range block.Transactions{
+
+			//traverse all inputs
+			if !tx.IsCoinBase() {
+				for _, input := range tx.TXInputs {
+					if input.validateUTXO(address) {
+						STXO[string(tx.TXID)] = append(STXO[string(tx.TXID)], input.Vout)
+					}
+				}
+			}
+
+			OUTPUTS:
+			//traverse all outputs, and find all UTXO of the address
+			for i, output := range tx.TXOutputs{
+				//verify if this output has been consumed or not
+				if STXO[string(tx.TXID)] != nil{
+					indices := STXO[string(tx.TXID)]
+					for _,index := range indices{
+						//check with index if current output has been consumed
+						if int64(i) == index{
+							continue OUTPUTS
+						}
+					}
+				}
+
+
+				if output.validateUTXO(address){
+					UTXOTransactions = append(UTXOTransactions, *tx)
+				}
+			}
+
+		}
+
+		if len(block.PreviousBlockHash) == 0 {
+			break
+		}
+	}
+	return UTXOTransactions
+}
+
+func (bc *BlockChain)findUTXO(address string)  []*TXOutput{
+
+	var utxos []*TXOutput
+	txs := bc.findUTXOTransactions(address)
+
+	for _,tx := range txs{
+		//traverse the tx
+		for _,output := range tx.TXOutputs{
+			if output.validateUTXO(address) {//this step seems to be redundant
+				utxos = append(utxos, &output)
+			}
+		}
+	}
+
+	return utxos
 }

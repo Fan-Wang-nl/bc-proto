@@ -20,6 +20,7 @@ const usage = `
 const AddBlockCmdString = "addBlock"
 const PrintChainCmdString = "printChain"
 const CreateChainCmdString = "createChain"
+const GetBalanceCmdString = "getBalance"
 
 func (cli *CLI)parameterCheck() {
 	if len(os.Args) < 2{
@@ -33,9 +34,11 @@ func (cli *CLI)Run() {
 	createChainCmd := flag.NewFlagSet(CreateChainCmdString, flag.ExitOnError)
 	addBlockCmd := flag.NewFlagSet(AddBlockCmdString, flag.ExitOnError)
 	printChainCmd := flag.NewFlagSet(PrintChainCmdString, flag.ExitOnError)
+	getBalanceCmd := flag.NewFlagSet(GetBalanceCmdString, flag.ExitOnError)
 
 	addBlockPara := addBlockCmd.String("data", "","block transaction info")
 	createChainPara := createChainCmd.String("address", "","address info")
+	getBalancePara := getBalanceCmd.String("address", "","address info")
 
 	switch os.Args[1] {
 	case CreateChainCmdString:
@@ -65,6 +68,17 @@ func (cli *CLI)Run() {
 		CheckErr("parse Run parameter 2", err)
 		if printChainCmd.Parsed(){
 			cli.PrintChain()
+		}
+	case GetBalanceCmdString:
+		err := getBalanceCmd.Parse(os.Args[2:])
+		CheckErr("parse Run parameter 3", err)
+		//after parsed, the data will be injected to addBlockPara
+		if getBalanceCmd.Parsed(){
+			if *getBalancePara == ""{
+				println("address should not be empty")
+				cli.printUsage()
+			}
+			cli.GetBalance(*getBalancePara)
 		}
 	default:
 		println("unknown command")
