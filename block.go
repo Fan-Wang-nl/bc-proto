@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/gob"
 	"time"
 )
@@ -69,4 +70,20 @@ func NewBlock(txs []*Transaction, PreviousBlockHash []byte) *Block {
 
 func NewGenesisBlock(coinbase *Transaction) *Block{
 	return NewBlock([]*Transaction{coinbase}, []byte{})
+}
+
+//HashTransaction imitate merkel root
+func (block *Block)HashTransaction() []byte {
+	var txHashes [][]byte
+	txs := block.Transactions
+
+	//not real Merkel root, a simplified version
+	for _, tx := range txs{
+		txHashes = append(txHashes, tx.TXID)
+	}
+
+	//from [][]byte to []byte
+	data := bytes.Join(txHashes, []byte{})
+	hash := sha256.Sum256(data) //[32]byte
+	return hash[:]
 }
