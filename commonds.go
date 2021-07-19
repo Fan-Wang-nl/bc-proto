@@ -2,12 +2,6 @@ package main
 
 import "fmt"
 
-func (cli *CLI)AddBlock(data string) {
-	//bc := getBlockChainHandler()
-	//bc.AddBlock(data) //TODO
-}
-
-
 func (cli *CLI)PrintChain() {
 	bc := getBlockChainHandler()
 	defer bc.db.Close()
@@ -19,7 +13,7 @@ func (cli *CLI)PrintChain() {
 		fmt.Printf("transaction number: %d\n", len(block.Transactions))
 		for _,transactionP := range (*block).Transactions{
 			for _,input := range (*transactionP).TXInputs{
-				fmt.Printf("	transaction input: %s;	%d; %s\n", input.TXID, input.Vout ,input.ScriptSig)
+				fmt.Printf("	transaction input: %s;	%d; %s\n", string(input.TXID), input.Vout ,input.ScriptSig)
 			}
 
 			for _,output := range (*transactionP).TXOutputs{
@@ -52,4 +46,15 @@ func (cli *CLI) CreateChain(address string) {
 	bc := InitBlockChain(address)
 	bc.db.Close()
 	println("create a blockchain successfully")
+}
+
+func (cli *CLI)send(from, to string, amount float64){
+	bc := getBlockChainHandler()
+	defer bc.db.Close()
+
+	tx := NewTransaction(from, to, amount, bc)
+
+	bc.AddBlock([]*Transaction{tx})
+
+	println("send successfully")
 }

@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
+	"os"
 )
 
 const reward = 12.5
@@ -30,8 +31,43 @@ type TXOutput struct {
 	ScriptPubKey string
 }
 
-func NewTransaction(){
+func NewTransaction(from, to string, amount float64, bc *BlockChain) *Transaction{
+	//map[string][]int64; key is the transaction ID, and the array the indices inside the transaction
+	validUTXOs := make(map[string][]int64)
+	var total float64
+	validUTXOs, total = bc.findSuitableUTXOs(from, amount)
 
+	if total < amount{
+		println("The UTXO is not enough")
+		os.Exit(1)
+	}
+
+	var inputs []TXInput
+	var outputs []TXOutput
+
+	//1, create inputs. transform from outputs to inputs
+	//traverse all transactions
+	for TxID, outputIndices := range validUTXOs{
+		//traverse all valid outputs of the transaction
+		for _,index := range outputIndices{
+			input := TXInput{TXID: []byte(TxID), Vout: index,  ScriptSig: from}
+			inputs = append(inputs, input)
+		}
+	}
+
+	//2 create outputs.
+	output := TXOutput{amount, to}
+	outputs = append(outputs, output)
+
+	//return the change
+	if total > amount{
+		output := TXOutput{total - amount, from}
+		outputs = append(outputs, output)
+	}
+
+	tx := Transaction{nil, inputs, outputs}
+	tx.setTXID()
+	return &tx
 }
 
 //check if current user owns the UTXO and can consume them

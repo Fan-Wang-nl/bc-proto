@@ -12,15 +12,14 @@ type CLI struct {
 
 const usage = `
 	createChain --address ADDRESS	"create a blockchain"
-	addBlock 	--data Data	"add a block to this blockchain"
 	send --from FROM --to TO --amount AMOUNT	"send coin from FROM to TO"
 	getBalance	--address ADDRESS	"check balance of an address"
 	printChain			"print all blocks"`
 
-const AddBlockCmdString = "addBlock"
 const PrintChainCmdString = "printChain"
 const CreateChainCmdString = "createChain"
 const GetBalanceCmdString = "getBalance"
+const sendCmdString = "send"
 
 func (cli *CLI)parameterCheck() {
 	if len(os.Args) < 2{
@@ -32,13 +31,19 @@ func (cli *CLI)Run() {
 	cli.parameterCheck()
 
 	createChainCmd := flag.NewFlagSet(CreateChainCmdString, flag.ExitOnError)
-	addBlockCmd := flag.NewFlagSet(AddBlockCmdString, flag.ExitOnError)
+	//addBlockCmd := flag.NewFlagSet(AddBlockCmdString, flag.ExitOnError)
 	printChainCmd := flag.NewFlagSet(PrintChainCmdString, flag.ExitOnError)
 	getBalanceCmd := flag.NewFlagSet(GetBalanceCmdString, flag.ExitOnError)
+	sendCmd := flag.NewFlagSet(sendCmdString, flag.ExitOnError)
 
-	addBlockPara := addBlockCmd.String("data", "","block transaction info")
+	//addBlockPara := addBlockCmd.String("data", "","block transaction info")
 	createChainPara := createChainCmd.String("address", "","address info")
 	getBalancePara := getBalanceCmd.String("address", "","address info")
+
+	//related to send
+	sendParaFrom := sendCmd.String("from", "","sender address info")
+	sendParaTo := sendCmd.String("to", "","receiver address info")
+	sendParaAmount := sendCmd.Float64("amount", 0,"transaction amount")
 
 	switch os.Args[1] {
 	case CreateChainCmdString:
@@ -52,17 +57,15 @@ func (cli *CLI)Run() {
 			}
 			cli.CreateChain(*createChainPara)
 		}
-	case AddBlockCmdString:
-		err := addBlockCmd.Parse(os.Args[2:])
+	case sendCmdString:
+		err := sendCmd.Parse(os.Args[2:])
 		CheckErr("parse Run parameter 1", err)
-		//after parsed, the data will be injected to addBlockPara
-		if addBlockCmd.Parsed(){
-			if *addBlockPara == ""{
-				println("transaction data should not be empty")
-				cli.printUsage()
-			}
-			cli.AddBlock(*addBlockPara)
+		if *sendParaFrom == "" || *sendParaTo == "" || *sendParaAmount <= 0{
+			println("invalid parameter")
+			cli.printUsage()
 		}
+		cli.send(*sendParaFrom, *sendParaTo, *sendParaAmount)
+
 	case PrintChainCmdString:
 		err := printChainCmd.Parse(os.Args[2:])
 		CheckErr("parse Run parameter 2", err)

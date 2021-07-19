@@ -139,7 +139,7 @@ func (bc *BlockChain)findUTXOTransactions(address string)  []Transaction{
 			if !tx.IsCoinBase() {
 				for _, input := range tx.TXInputs {
 					if input.validateUTXO(address) {
-						STXO[string(tx.TXID)] = append(STXO[string(tx.TXID)], input.Vout)
+						STXO[string(input.TXID)] = append(STXO[string(input.TXID)], input.Vout)
 					}
 				}
 			}
@@ -173,19 +173,51 @@ func (bc *BlockChain)findUTXOTransactions(address string)  []Transaction{
 	return UTXOTransactions
 }
 
-func (bc *BlockChain)findUTXO(address string)  []*TXOutput{
+func (bc *BlockChain)findUTXO(address string)  []TXOutput{
 
-	var utxos []*TXOutput
+	var utxos []TXOutput
 	txs := bc.findUTXOTransactions(address)
 
 	for _,tx := range txs{
 		//traverse the tx
 		for _,output := range tx.TXOutputs{
 			if output.validateUTXO(address) {//this step seems to be redundant
-				utxos = append(utxos, &output)
+				//TODO ,test pupose
+				println("000 utxo value: ", output.Value, ", address: ", output.ScriptPubKey)
+				utxos = append(utxos, output)
 			}
 		}
 	}
 
+	for _,utxo := range utxos{
+		println("111 utxo value: ", utxo.Value, ", address: ", utxo.ScriptPubKey)
+	}
+
+
 	return utxos
+}
+
+func (bc *BlockChain) findSuitableUTXOs(address string, amount float64) (map[string][]int64, float64) {
+	txs := bc.findUTXOTransactions(address)
+
+	var total float64
+	validUTXOs := make(map[string][]int64)
+
+	FIND:
+	for _,tx := range txs{
+		//traverse the tx, and get the UTXO
+		for index,output := range tx.TXOutputs{
+			if output.validateUTXO(address) {
+				if total <amount{
+					total += output.Value
+					validUTXOs[string(tx.TXID)] = append(validUTXOs[string(tx.TXID)], int64(index))
+				}else {
+					break FIND//jump out of the whole series
+				}
+
+			}
+		}
+	}
+
+	return validUTXOs, total
 }
